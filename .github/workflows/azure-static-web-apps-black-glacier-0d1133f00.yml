@@ -1,4 +1,5 @@
 name: Azure Static Web Apps CI/CD
+
 on:
   push:
     branches:
@@ -7,6 +8,7 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - master
+
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
@@ -29,38 +31,6 @@ jobs:
           api_location: "api" # Api source code path - optional
           app_artifact_location: "" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
-- task: CmdLine@2
-  inputs:
-    script: |
-      echo Replace Index.html
-      pushd $(uiSource)/public
-      mv index.release.html index.html
-      popd
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
-
-- script: |
-    pushd $(uiSource)
-    npm install
-    npm run build
-    popd
-  displayName: 'npm install and build'
-
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(uiBuild)'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-    replaceExistingArchive: true
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
